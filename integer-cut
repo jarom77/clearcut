@@ -1,5 +1,12 @@
 #!/bin/bash
 
+# check for test mode
+TEST=false
+if [ "$1" == "-t" ]; then
+    TEST=true
+    shift
+fi
+
 if [ $# -ne 2 ]; then
     echo "Syntax: $0 <input.mp4> <output.mp4>"
     exit 1
@@ -19,7 +26,16 @@ file=$1
 cut_file=.cuts.cfg
 
 > "$cut_file"
-printf "file '$file'\ninpoint 0\n" > $cut_file
+
+begin_clip=0
+end_clip=
+if $TEST; then
+    echo "Clip begin:"
+    read begin_clip
+    echo "Clip end:"
+    read end_clip
+fi
+printf "file '$file'\ninpoint $begin_clip\n" > $cut_file
 
 while true; do
     echo "Cut start (blank to end):"
@@ -34,6 +50,10 @@ while true; do
     printf "outpoint $start_s\nfile '$file'\ninpoint $end_s\n" >> $cut_file
 
 done
+
+if $TEST; then
+    printf "outpoint $end_clip\n" >> $cut_file
+fi
 
 ffmpeg -f concat -i "$cut_file" -c copy "$2"
 
