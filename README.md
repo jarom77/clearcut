@@ -2,6 +2,8 @@
 
 This repo allows command-line editing of movies by splicing. The purpose is to provide similar functionality to Clearplay for videos you own. It splices videos from a list of cuts.
 
+Dependencies: ffmpeg
+
 ## Usage
 
 ```
@@ -19,12 +21,12 @@ There are two scripts, `cut` and `integer-cut`. They have the same syntax and do
 To apply a list of changes, just feed `cut` a file with a newline at the end, for example the file `oppenheimer/visualCuts.cfg`. This is done as follows:
 
 ```
-cat clearcut/oppenheimer/visualCuts.cfg | ./clearcut/cut oppenheimer_original.mkv oppenheimer_clean.mkv
+cat visualCuts.cfg | ../cut oppenheimer_original.mkv oppenheimer_clean.mkv
 ```
 
 ## File Structure
 
-Each movie will have its own folder, names using POSIX-compliant folder names. This isn't the wild west.
+Each movie will have its own folder, names using POSIX-compliant folder names. It's easiest to put the actual movies in these folders as well - git will ignore all movie files.
 
 Each folder should have at least a `.cfg` file with a list of cuts and a `master.txt` with explanations of each cut, which allows for expansion and customization. If the master is changed, create a completely new `.cfg` file for those changes, leaving the others intact. New config files should only be created for significant changes; we don't want a new one for every permutation of cuts.
 
