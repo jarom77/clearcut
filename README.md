@@ -14,6 +14,8 @@ Both files can be of any format that `ffmpeg` supports. You could go from MKV to
 
 This will ask for a series of scenes to cut out by timestamp. Timestamps must be entered in the format `[[h:]m:]s` (spaces can also be used as a delimiter). Non-realistic times are supported by accident (i.e. 1:0:183 for 1 hour, 3 minutes, and 3 seconds, or 1:-20:10 for 40 minutes, 10 seconds). Remember, these are scenes you want gone, not what's left.
 
+> **Scenes must be entered in ascending order!**
+
 ### Script Differences
 
 There are two scripts, `cut` and `integer-cut`. They have the same syntax and do essentially the same thing. However, `integer-cut` only supports integer seconds, while `cut` supports seconds with decimals. In addition, `integer-cut` runs faster, but may introduce AV sync errors, especially for smaller cuts.
@@ -23,6 +25,8 @@ To apply a list of changes, just feed `cut` a file with a newline at the end, fo
 ```
 cat visualCuts.cfg | ../cut oppenheimer_original.mkv oppenheimer_clean.mkv
 ```
+
+> **Remember to keep the config file in ascending timestamp order!**
 
 ## File Structure
 
