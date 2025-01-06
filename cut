@@ -1,0 +1,50 @@
+#!/bin/bash
+
+if [ $# -ne 2 ]; then
+    echo "Syntax: $0 <input.mp4> <output.mp4>"
+    exit 1
+fi
+
+time2sec() {
+    time=$(printf "$1" | grep -Eo '^[^\.]*')
+    frac=$(printf "$1" | grep -Eo '\..*$')
+    split=$(printf "$time" | tr ':' ' ')
+    seconds=0
+    for i in $split; do
+        let seconds=$seconds*60+$i
+    done
+
+    printf "%d%s" $seconds $frac
+}
+
+file=$1
+cut_file=.cuts.cfg
+
+> "$cut_file"
+printf "file '$file'\ninpoint 0\n" > $cut_file
+
+while true; do
+    echo "Cut start (blank to end):"
+    read begin
+    [ -z "$begin" ] && break
+    echo "Cut end:"
+    read finish
+
+    start_s=$(time2sec "$begin")
+    end_s=$(time2sec "$finish")
+    
+    printf "outpoint $start_s\nfile '$file'\ninpoint $end_s\n" >> $cut_file
+
+done
+
+# first line simply copies both audio and video, and thus runs
+#   much faster. However, A/V sometimes decouples for a couple seconds
+#   around cuts (caused by keyframes, etc). The second line remixes
+#   audio, dependably fixing AV sync, but taking 3-4x as long.
+# For non-fractional, large cuts, the first line should work, but
+#   for smaller cuts, and in case the first fails, the second will work.
+
+# ffmpeg -f concat -i "$cut_file" -c copy "$2"
+ffmpeg -f concat -i "$cut_file" -c:v copy -af aresample=async=1000 "$2"
+
+rm "$cut_file"

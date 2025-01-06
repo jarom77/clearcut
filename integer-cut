@@ -1,0 +1,40 @@
+#!/bin/bash
+
+if [ $# -ne 2 ]; then
+    echo "Syntax: $0 <input.mp4> <output.mp4>"
+    exit 1
+fi
+
+time2sec() {
+    split=$(printf "$1" | tr ':' ' ')
+    seconds=0
+    for i in $split; do
+        let seconds=$seconds*60+$i
+    done
+
+    printf "%d" $seconds
+}
+
+file=$1
+cut_file=.cuts.cfg
+
+> "$cut_file"
+printf "file '$file'\ninpoint 0\n" > $cut_file
+
+while true; do
+    echo "Cut start (blank to end):"
+    read begin
+    [ -z "$begin" ] && break
+    echo "Cut end:"
+    read finish
+
+    start_s=$(time2sec "$begin")
+    end_s=$(time2sec "$finish")
+    
+    printf "outpoint $start_s\nfile '$file'\ninpoint $end_s\n" >> $cut_file
+
+done
+
+ffmpeg -f concat -i "$cut_file" -c copy "$2"
+
+rm "$cut_file"
